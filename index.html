@@ -397,8 +397,9 @@
                     throw new Error('Veri alınamadı');
                 }
                 summaryData = await response.json();
-                updateSummaryDashboard(summaryData);
-                document.getElementById('last-updated').textContent = new Date().toLocaleDateString('tr-TR');
+                console.log(summaryData);
+                //updateSummaryDashboard(summaryData);
+                //document.getElementById('last-updated').textContent = new Date().toLocaleDateString('tr-TR');
             } catch (error) {
                 console.error('Özet verileri getirilemedi:', error);
                 document.getElementById('summary-dashboard').innerHTML = `
