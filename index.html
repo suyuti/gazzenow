@@ -191,12 +191,154 @@
                 height: 300px;
             }
         }
+        #casualties-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .casualty-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 18px 20px 14px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-height: 140px;
+            transition: box-shadow 0.2s;
+        }
+        .casualty-card:hover {
+            box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+        }
+        .casualty-card-date {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4a4a4a;
+            margin-bottom: 10px;
+        }
+        .casualty-card-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+        .casualty-label {
+            color: #888;
+            font-size: 0.98rem;
+        }
+        .casualty-value {
+            font-weight: 500;
+            color: #d32f2f;
+            font-size: 1.08rem;
+        }
+        @media (max-width: 600px) {
+            #casualties-cards-container {
+                padding: 0 2px;
+            }
+        }
+        .days-since-box {
+            margin: 18px auto 0 auto;
+            background: #fff3e0;
+            color: #d84315;
+            font-size: 1.35rem;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 14px 28px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            letter-spacing: 0.5px;
+        }
+        .header-flex {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .logo-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .logo-box img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        @media (max-width: 600px) {
+            .header-flex {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .logo-box img {
+                width: 38px;
+                height: 38px;
+            }
+            .container {
+                width: 98%;
+                padding: 8px 2px;
+            }
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .card {
+                padding: 12px;
+                font-size: 0.98rem;
+            }
+            .days-since-box {
+                font-size: 1.05rem;
+                padding: 10px 8px;
+                max-width: 98vw;
+            }
+            .tab {
+                font-size: 0.95rem;
+                padding: 8px 8px;
+            }
+            .tab-content {
+                padding: 10px 2px;
+            }
+            .chart-container {
+                height: 220px;
+                padding: 8px;
+            }
+            .casualty-card {
+                min-height: 100px;
+                padding: 10px 8px 8px 8px;
+                font-size: 0.97rem;
+            }
+            .casualty-card-date {
+                font-size: 1rem;
+            }
+            .casualty-label, .casualty-value {
+                font-size: 0.95rem;
+            }
+            table {
+                font-size: 0.85rem;
+            }
+            th, td {
+                padding: 7px 6px;
+            }
+            .btn {
+                font-size: 0.95rem;
+                padding: 7px 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
-        <div class="container">
+        <div class="container header-flex">
+            <span class="logo-box">
+                <img src="gazzenow_logo.svg" alt="GazzeNow Logo" style="width: 80px; height:80px; object-fit:cover; border-radius:50%;" />
+            </span>
             <h1>GazzeNow</h1>
+            <div id="days-since" class="days-since-box"></div>
         </div>
     </header>
 
@@ -206,6 +348,7 @@
             <button class="tab" onclick="openTab(event, 'casualties')">Günlük Kayıplar</button>
             <button class="tab" onclick="openTab(event, 'infrastructure')">Altyapı Hasarı</button>
             <button class="tab" onclick="openTab(event, 'press')">Basın Mensupları</button>
+            <button class="tab" onclick="openTab(event, 'martyrs')">Şehitler</button>
         </div>
 
         <div id="summary" class="tab-content active">
@@ -254,22 +397,7 @@
                 <canvas id="daily-casualties-chart"></canvas>
             </div>
             <div class="loading" id="casualties-loading">Veriler yükleniyor...</div>
-            <div id="casualties-table-container" style="display: none;">
-                <table id="casualties-table">
-                    <thead>
-                        <tr>
-                            <th>Tarih</th>
-                            <th>Ölenler</th>
-                            <th>Yaralananlar</th>
-                            <th>Çocuk Kayıpları</th>
-                            <th>Kadın Kayıpları</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- JS ile doldurulacak -->
-                    </tbody>
-                </table>
-            </div>
+            <div id="casualties-cards-container" style="display: none; margin-top: 24px;"></div>
         </div>
 
         <div id="infrastructure" class="tab-content">
@@ -314,6 +442,28 @@
                 </table>
             </div>
         </div>
+
+        <div id="martyrs" class="tab-content">
+            <h2>Gazze Şehitleri</h2>
+            <div class="loading" id="martyrs-loading">Veriler yükleniyor...</div>
+            <div id="martyrs-table-container" style="display: none;">
+                <table id="martyrs-table">
+                    <thead>
+                        <tr>
+                            <th>İsim (Arapça)</th>
+                            <th>İsim (İngilizce)</th>
+                            <th>Doğum Tarihi</th>
+                            <th>Cinsiyet</th>
+                            <th>Yaş</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS ile doldurulacak -->
+                    </tbody>
+                </table>
+                <div id="martyrs-pagination" style="margin-top: 18px; display: flex; justify-content: center; gap: 10px;"></div>
+            </div>
+        </div>
     </div>
 
     <footer>
@@ -327,14 +477,22 @@
         // API URLs
         const SUMMARY_URL = 'https://data.techforpalestine.org/api/v3/summary.json';
         const CASUALTIES_DAILY_URL = 'https://data.techforpalestine.org/api/v2/casualties_daily.min.json';
-        const INFRASTRUCTURE_URL = 'https://data.techforpalestine.org/api/v3/infrastructure-damaged.json';
+        const INFRASTRUCTURE_URL = 'https://data.techforpalestine.org/api/v3/infrastructure-damaged.min.json';
         const PRESS_KILLED_URL = 'https://data.techforpalestine.org/api/v3/press_killed_in_gaza.json';
+        const MARTYRS_PAGE_URL = 'https://data.techforpalestine.org/api/v2/killed-in-gaza/page-';
 
         // Ana veri depolama
         let summaryData = null;
         let casualtiesData = null;
         let infrastructureData = null;
         let pressKilledData = null;
+        let martyrsData = null;
+        let martyrsCurrentPage = 1;
+        let martyrsTotalPages = 100; // Varsayılan, ilk yüklemede güncellenecek
+
+        // Grafik referansı
+        let dailyCasualtiesChart = null;
+        let infrastructureChart = null;
 
         // Sayfa yüklenince verileri getir
         window.onload = function() {
@@ -355,6 +513,9 @@
                     }
                     if (tabId.includes('basın') && !pressKilledData) {
                         fetchPressKilledData();
+                    }
+                    if (tabId.includes('şehit') && !martyrsData) {
+                        fetchMartyrsData(martyrsCurrentPage);
                     }
                 });
             });
@@ -384,6 +545,9 @@
             }
             if (tabName === 'press' && !pressKilledData) {
                 fetchPressKilledData();
+            }
+            if (tabName === 'martyrs') {
+                fetchMartyrsData(martyrsCurrentPage);
             }
         }
 
@@ -416,18 +580,19 @@
         async function fetchCasualtiesData() {
             try {
                 document.getElementById('casualties-loading').style.display = 'flex';
-                document.getElementById('casualties-table-container').style.display = 'none';
+                document.getElementById('casualties-cards-container').style.display = 'none';
                 
                 const response = await fetch(CASUALTIES_DAILY_URL);
                 if (!response.ok) {
                     throw new Error('Veri alınamadı');
                 }
                 casualtiesData = await response.json();
+                console.log(JSON.stringify(casualtiesData, null, 2))
                 updateCasualtiesTab(casualtiesData);
                 document.getElementById('last-updated').textContent = new Date().toLocaleDateString('tr-TR');
                 
                 document.getElementById('casualties-loading').style.display = 'none';
-                document.getElementById('casualties-table-container').style.display = 'block';
+                document.getElementById('casualties-cards-container').style.display = 'grid';
             } catch (error) {
                 console.error('Günlük kayıp verileri getirilemedi:', error);
                 document.getElementById('casualties-loading').style.display = 'none';
@@ -491,6 +656,78 @@
             }
         }
 
+        // Şehitler verisini getir (paging)
+        async function fetchMartyrsData(page = 1) {
+            try {
+                document.getElementById('martyrs-loading').style.display = 'flex';
+                document.getElementById('martyrs-table-container').style.display = 'none';
+                const response = await fetch(MARTYRS_PAGE_URL + page + '.json');
+                if (!response.ok) {
+                    throw new Error('Veri alınamadı');
+                }
+                martyrsData = await response.json();
+                martyrsCurrentPage = page;
+                // Toplam sayfa sayısı API'den gelmiyor, elle ayarlanabilir veya bir defa alınabilir
+                martyrsTotalPages = 100; // Örneğin 100 sayfa varsayalım
+                updateMartyrsTab(martyrsData);
+                document.getElementById('martyrs-loading').style.display = 'none';
+                document.getElementById('martyrs-table-container').style.display = 'block';
+                updateMartyrsPagination();
+            } catch (error) {
+                console.error('Şehitler verisi getirilemedi:', error);
+                document.getElementById('martyrs-loading').style.display = 'none';
+                document.getElementById('martyrs').innerHTML += `
+                    <div class="error">
+                        Şehitler verisi yüklenemedi. Lütfen daha sonra tekrar deneyin.
+                    </div>
+                `;
+            }
+        }
+
+        // Şehitler tabını güncelle
+        function updateMartyrsTab(data) {
+            const tableBody = document.getElementById('martyrs-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            for (const martyr of data) {
+                const row = tableBody.insertRow();
+                const nameArCell = row.insertCell(0);
+                nameArCell.textContent = martyr.name || '-';
+                const nameEnCell = row.insertCell(1);
+                nameEnCell.textContent = martyr.en_name || '-';
+                const dobCell = row.insertCell(2);
+                dobCell.textContent = martyr.dob || '-';
+                const sexCell = row.insertCell(3);
+                sexCell.textContent = martyr.sex === 'm' ? 'Erkek' : martyr.sex === 'f' ? 'Kadın' : '-';
+                const ageCell = row.insertCell(4);
+                ageCell.textContent = martyr.age !== undefined ? martyr.age : '-';
+            }
+        }
+
+        // Şehitler sayfalama kontrolleri
+        function updateMartyrsPagination() {
+            const pagination = document.getElementById('martyrs-pagination');
+            pagination.innerHTML = '';
+            // Önceki butonu
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = 'Önceki';
+            prevBtn.className = 'btn';
+            prevBtn.disabled = martyrsCurrentPage === 1;
+            prevBtn.onclick = () => fetchMartyrsData(martyrsCurrentPage - 1);
+            pagination.appendChild(prevBtn);
+            // Sayfa bilgisi
+            const pageInfo = document.createElement('span');
+            pageInfo.textContent = `Sayfa ${martyrsCurrentPage} / ${martyrsTotalPages}`;
+            pageInfo.style.margin = '0 10px';
+            pagination.appendChild(pageInfo);
+            // Sonraki butonu
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Sonraki';
+            nextBtn.className = 'btn';
+            nextBtn.disabled = martyrsCurrentPage === martyrsTotalPages;
+            nextBtn.onclick = () => fetchMartyrsData(martyrsCurrentPage + 1);
+            pagination.appendChild(nextBtn);
+        }
+
         // Özet dashboard'u güncelle
         function updateSummaryDashboard(data) {
             // Gaza verileri
@@ -550,99 +787,66 @@
 
         // Günlük kayıplar tabını güncelle
         function updateCasualtiesTab(data) {
-            // En son 30 günün verisini alalım (çok fazla veri olabilir)
-            const recentData = data.slice(-30);
+            // Tüm veriyi kullanalım
+            const recentData = data;
             
-            // Tabloyu doldur
-            const tableBody = document.getElementById('casualties-table').getElementsByTagName('tbody')[0];
-            tableBody.innerHTML = '';
-
-            console.log(recentData)
-            
-            for (const day of recentData) {
-                const row = tableBody.insertRow();
-                
-                const dateCell = row.insertCell(0);
-                dateCell.textContent = formatDate(day.report_date);
-                
-                const killedCell = row.insertCell(1);
-                killedCell.textContent = formatNumber(day.killed || 0);
-                
-                const injuredCell = row.insertCell(2);
-                injuredCell.textContent = formatNumber(day.injured || 0);
-                
-                const childrenCell = row.insertCell(3);
-                childrenCell.textContent = day.children_killed ? formatNumber(day.children_killed) : '-';
-                
-                const womenCell = row.insertCell(4);
-                womenCell.textContent = day.women_killed ? formatNumber(day.women_killed) : '-';
-            }
-            
-            // Grafiği oluştur
-            const ctx = document.getElementById('daily-casualties-chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: recentData.map(day => formatDate(day.date)),
-                    datasets: [
-                        {
-                            label: 'Günlük Ölümler',
-                            data: recentData.map(day => day.daily_killed || 0),
-                            borderColor: '#d32f2f',
-                            backgroundColor: 'rgba(211, 47, 47, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.2,
-                            fill: true
-                        },
-                        {
-                            label: 'Günlük Yaralanmalar',
-                            data: recentData.map(day => day.daily_injured || 0),
-                            borderColor: '#ff9800',
-                            backgroundColor: 'rgba(255, 152, 0, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.2,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Son 30 Gün Gazze Kayıpları',
-                            font: {
-                                size: 18
-                            }
-                        },
-                        legend: {
-                            position: 'bottom'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Sayı'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Tarih'
-                            }
-                        }
+            // Tabloyu doldurmayı kaldır, kartları doldur
+            const cardsContainer = document.getElementById('casualties-cards-container');
+            cardsContainer.innerHTML = '';
+            for (let i = 0; i < recentData.length; i++) {
+                const day = recentData[i];
+                // Günlük çocuk ve kadın kaybı hesapla
+                let dailyChildren = '-';
+                if (day.ext_killed_children_cum !== undefined) {
+                    if (i === 0) {
+                        dailyChildren = formatNumber(day.ext_killed_children_cum);
+                    } else {
+                        const prev = recentData[i-1].ext_killed_children_cum || 0;
+                        dailyChildren = formatNumber(day.ext_killed_children_cum - prev);
                     }
                 }
-            });
+                let dailyWomen = '-';
+                if (day.ext_killed_women_cum !== undefined) {
+                    if (i === 0) {
+                        dailyWomen = formatNumber(day.ext_killed_women_cum);
+                    } else {
+                        const prev = recentData[i-1].ext_killed_women_cum || 0;
+                        dailyWomen = formatNumber(day.ext_killed_women_cum - prev);
+                    }
+                }
+                // Kart HTML'i
+                const card = document.createElement('div');
+                card.className = 'casualty-card';
+                card.innerHTML = `
+                    <div class="casualty-card-date">${formatDate(day.report_date)}</div>
+                    <div class="casualty-card-row">
+                        <span class="casualty-label">Ölümler:</span>
+                        <span class="casualty-value">${formatNumber(day.killed || 0)}</span>
+                    </div>
+                    <div class="casualty-card-row">
+                        <span class="casualty-label">Yaralananlar:</span>
+                        <span class="casualty-value">${formatNumber(day.injured || 0)}</span>
+                    </div>
+                    <div class="casualty-card-row">
+                        <span class="casualty-label">Çocuk Kayıpları:</span>
+                        <span class="casualty-value">${dailyChildren}</span>
+                    </div>
+                    <div class="casualty-card-row">
+                        <span class="casualty-label">Kadın Kayıpları:</span>
+                        <span class="casualty-value">${dailyWomen}</span>
+                    </div>
+                `;
+                cardsContainer.appendChild(card);
+            }
+            document.getElementById('casualties-loading').style.display = 'none';
+            cardsContainer.style.display = 'grid';
         }
 
         // Altyapı tabını güncelle
         function updateInfrastructureTab(data) {
-            // Son 20 raporu alalım
-            const recentData = data.slice(-20);
+            // Tüm veriyi kullanalım
+            //const recentData = data.slice(-20);
+            const recentData = data;
             
             // Tabloyu doldur
             const tableBody = document.getElementById('infrastructure-table').getElementsByTagName('tbody')[0];
@@ -652,47 +856,67 @@
                 const row = tableBody.insertRow();
                 
                 const dateCell = row.insertCell(0);
-                dateCell.textContent = formatDate(report.date);
+                dateCell.textContent = formatDate(report.report_date);
                 
                 const housesDestroyedCell = row.insertCell(1);
-                housesDestroyedCell.textContent = formatNumber(report.houses_destroyed || 0);
+                housesDestroyedCell.textContent = report.residential && report.residential.destroyed !== undefined ? formatNumber(report.residential.destroyed) : '-';
                 
                 const housesPartiallyCell = row.insertCell(2);
-                housesPartiallyCell.textContent = formatNumber(report.houses_partially || 0);
+                housesPartiallyCell.textContent = report.residential && report.residential.damaged !== undefined ? formatNumber(report.residential.damaged) : '-';
                 
                 const healthCentersCell = row.insertCell(3);
-                healthCentersCell.textContent = formatNumber(report.health_centers || 0);
+                healthCentersCell.textContent = report.health_centers && report.health_centers.destroyed !== undefined ? formatNumber(report.health_centers.destroyed) : '-';
                 
                 const schoolsCell = row.insertCell(4);
-                schoolsCell.textContent = formatNumber(report.schools || 0);
+                schoolsCell.textContent = report.educational_buildings && report.educational_buildings.destroyed !== undefined ? formatNumber(report.educational_buildings.destroyed) : '-';
             }
             
+            // Eski grafik varsa yok et
+            if (infrastructureChart) {
+                infrastructureChart.destroy();
+            }
             // Grafiği oluştur
             const ctx = document.getElementById('infrastructure-chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
+            infrastructureChart = new Chart(ctx, {
+                type: 'line',
                 data: {
-                    labels: recentData.map(day => formatDate(day.date)),
+                    labels: recentData.map(day => formatDate(day.report_date)),
                     datasets: [
                         {
                             label: 'Tamamen Yıkılmış Konutlar',
-                            data: recentData.map(day => day.houses_destroyed || 0),
-                            backgroundColor: '#d32f2f',
+                            data: recentData.map(day => day.residential && day.residential.destroyed !== undefined ? day.residential.destroyed : 0),
+                            borderColor: '#d32f2f',
+                            backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                            fill: true,
+                            borderWidth: 2,
+                            tension: 0.2
                         },
                         {
                             label: 'Kısmen Yıkılmış Konutlar',
-                            data: recentData.map(day => day.houses_partially || 0),
-                            backgroundColor: '#ff9800',
+                            data: recentData.map(day => day.residential && day.residential.damaged !== undefined ? day.residential.damaged : 0),
+                            borderColor: '#ff9800',
+                            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                            fill: true,
+                            borderWidth: 2,
+                            tension: 0.2
                         },
                         {
                             label: 'Zarar Görmüş Sağlık Merkezleri',
-                            data: recentData.map(day => day.health_centers || 0),
-                            backgroundColor: '#2196f3',
+                            data: recentData.map(day => day.health_centers && day.health_centers.destroyed !== undefined ? day.health_centers.destroyed : 0),
+                            borderColor: '#2196f3',
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                            fill: true,
+                            borderWidth: 2,
+                            tension: 0.2
                         },
                         {
                             label: 'Zarar Görmüş Okullar',
-                            data: recentData.map(day => day.schools || 0),
-                            backgroundColor: '#4caf50',
+                            data: recentData.map(day => day.educational_buildings && day.educational_buildings.destroyed !== undefined ? day.educational_buildings.destroyed : 0),
+                            borderColor: '#4caf50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            fill: true,
+                            borderWidth: 2,
+                            tension: 0.2
                         }
                     ]
                 },
@@ -759,6 +983,16 @@
             const date = new Date(dateStr);
             return date.toLocaleDateString('tr-TR');
         }
+
+        // 7 Ekim 2023'ten bu yana geçen gün sayısını hesapla ve göster
+        function showDaysSince() {
+            const start = new Date('2023-10-07T00:00:00Z');
+            const now = new Date();
+            const diffTime = now - start;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('days-since').textContent = `7 Ekim 2023'ten bu yana ${diffDays} gün geçti.`;
+        }
+        showDaysSince();
     </script>
 </body>
 </html>
