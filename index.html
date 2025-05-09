@@ -187,6 +187,8 @@
             border-collapse: collapse;
             margin: 20px 0;
             font-size: 0.9rem;
+            overflow-x: auto;
+            display: block;
         }
         th, td {
             padding: 12px 15px;
@@ -219,6 +221,8 @@
             color: white;
             text-align: center;
             padding: 15px 0;
+            width: 100%;
+            box-sizing: border-box;
             margin-top: 40px;
             font-size: 0.9rem;
         }
@@ -233,6 +237,9 @@
             display: flex;
             margin-bottom: 20px;
             border-bottom: 1px solid #ddd;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
         }
         .tab {
             padding: 10px 20px;
@@ -242,6 +249,7 @@
             outline: none;
             transition: 0.3s;
             font-size: 1rem;
+            white-space: nowrap;
         }
         .tab:hover {
             background-color: #ddd;
@@ -256,6 +264,7 @@
             border: 1px solid #ddd;
             border-top: none;
             animation: fadeEffect 1s;
+            overflow-x: auto;
         }
         .tab-content.active {
             display: block;
@@ -290,6 +299,8 @@
             align-items: flex-start;
             min-height: 140px;
             transition: box-shadow 0.2s;
+            word-break: break-word;
+            overflow-x: auto;
         }
         .casualty-card:hover {
             box-shadow: 0 6px 18px rgba(0,0,0,0.10);
@@ -316,8 +327,67 @@
             font-size: 1.08rem;
         }
         @media (max-width: 600px) {
-            #casualties-cards-container {
-                padding: 0 2px;
+            .tabs {
+                margin-bottom: 10px;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 2px;
+            }
+            .container {
+                width: 98%;
+                padding: 8px 2px;
+            }
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .card {
+                padding: 12px;
+                font-size: 0.98rem;
+            }
+            .days-since-box {
+                font-size: 1.05rem;
+                padding: 10px 8px;
+                max-width: 98vw;
+            }
+            .tab {
+                font-size: 0.95rem;
+                padding: 8px 8px;
+            }
+            .tab-content {
+                padding: 10px 2px;
+                overflow-x: auto;
+            }
+            .chart-container {
+                height: 220px;
+                padding: 8px;
+            }
+            .casualty-card {
+                min-height: 100px;
+                padding: 10px 8px 8px 8px;
+                font-size: 0.97rem;
+                overflow-x: auto;
+            }
+            .casualty-card-date {
+                font-size: 1rem;
+            }
+            .casualty-label, .casualty-value {
+                font-size: 0.95rem;
+            }
+            table {
+                font-size: 0.85rem;
+                overflow-x: auto;
+                display: block;
+            }
+            th, td {
+                padding: 7px 6px;
+            }
+            .btn {
+                font-size: 0.95rem;
+                padding: 7px 10px;
+            }
+            footer {
+                padding: 10px 0;
+                font-size: 0.85rem;
             }
         }
     </style>
