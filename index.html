@@ -682,4 +682,75 @@
                             backgroundColor: '#2196f3',
                         },
                         {
-                            label: 'Zarar Görmüş Okullar
+                            label: 'Zarar Görmüş Okullar',
+                            data: recentData.map(day => day.schools || 0),
+                            backgroundColor: '#4caf50',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Altyapı Hasarı Zaman İçindeki Değişimi',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Sayı'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tarih'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Basın tabını güncelle
+        function updatePressTab(data) {
+            // Tabloyu doldur
+            const tableBody = document.getElementById('press-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            
+            for (const journalist of data) {
+                const row = tableBody.insertRow();
+                
+                const nameArCell = row.insertCell(0);
+                nameArCell.textContent = journalist.name || '-';
+                
+                const nameEnCell = row.insertCell(1);
+                nameEnCell.textContent = journalist.name_en || '-';
+                
+                const notesCell = row.insertCell(2);
+                notesCell.textContent = journalist.notes || '-';
+            }
+        }
+
+        // Yardımcı fonksiyonlar
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('tr-TR');
+        }
+    </script>
+</body>
+</html>
