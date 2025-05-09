@@ -390,7 +390,9 @@
         // Özet verileri getir
         async function fetchSummaryData() {
             try {
+                console.log(SUMMARY_URL);
                 const response = await fetch(SUMMARY_URL);
+                console.log(reponse)
                 if (!response.ok) {
                     throw new Error('Veri alınamadı');
                 }
