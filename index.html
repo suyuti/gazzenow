@@ -196,7 +196,7 @@
 <body>
     <header>
         <div class="container">
-            <h1>Filistin Veri Görselleştirme</h1>
+            <h1>GazzeNow</h1>
         </div>
     </header>
 
@@ -326,7 +326,7 @@
     <script>
         // API URLs
         const SUMMARY_URL = 'https://data.techforpalestine.org/api/v3/summary.json';
-        const CASUALTIES_DAILY_URL = 'https://data.techforpalestine.org/api/v3/casualties-daily.json';
+        const CASUALTIES_DAILY_URL = 'https://data.techforpalestine.org/api/v2/casualties_daily.min.json';
         const INFRASTRUCTURE_URL = 'https://data.techforpalestine.org/api/v3/infrastructure-damaged.json';
         const PRESS_KILLED_URL = 'https://data.techforpalestine.org/api/v3/press_killed_in_gaza.json';
 
@@ -390,18 +390,20 @@
         // Özet verileri getir
         async function fetchSummaryData() {
             try {
+                console.log('Özet verileri yükleniyor...');
                 console.log(SUMMARY_URL);
                 const response = await fetch(SUMMARY_URL);
-                console.log(reponse)
+                console.log(response)
+                console.log("zzzzzzzzzzzzzzzz")
                 if (!response.ok) {
                     throw new Error('Veri alınamadı');
                 }
                 summaryData = await response.json();
                 console.log(summaryData);
-                //updateSummaryDashboard(summaryData);
-                //document.getElementById('last-updated').textContent = new Date().toLocaleDateString('tr-TR');
+                updateSummaryDashboard(summaryData);
+                document.getElementById('last-updated').textContent = new Date().toLocaleDateString('tr-TR');
             } catch (error) {
-                console.error('Özet verileri getirilemedi:', error);
+                console.error('zzzzzz Özet verileri getirilemedi:', error);
                 document.getElementById('summary-dashboard').innerHTML = `
                     <div class="error">
                         Özet verileri yüklenemedi. Lütfen daha sonra tekrar deneyin.
@@ -422,6 +424,7 @@
                 }
                 casualtiesData = await response.json();
                 updateCasualtiesTab(casualtiesData);
+                document.getElementById('last-updated').textContent = new Date().toLocaleDateString('tr-TR');
                 
                 document.getElementById('casualties-loading').style.display = 'none';
                 document.getElementById('casualties-table-container').style.display = 'block';
@@ -553,18 +556,20 @@
             // Tabloyu doldur
             const tableBody = document.getElementById('casualties-table').getElementsByTagName('tbody')[0];
             tableBody.innerHTML = '';
+
+            console.log(recentData)
             
             for (const day of recentData) {
                 const row = tableBody.insertRow();
                 
                 const dateCell = row.insertCell(0);
-                dateCell.textContent = formatDate(day.date);
+                dateCell.textContent = formatDate(day.report_date);
                 
                 const killedCell = row.insertCell(1);
-                killedCell.textContent = formatNumber(day.daily_killed || 0);
+                killedCell.textContent = formatNumber(day.killed || 0);
                 
                 const injuredCell = row.insertCell(2);
-                injuredCell.textContent = formatNumber(day.daily_injured || 0);
+                injuredCell.textContent = formatNumber(day.injured || 0);
                 
                 const childrenCell = row.insertCell(3);
                 childrenCell.textContent = day.children_killed ? formatNumber(day.children_killed) : '-';
