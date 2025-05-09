@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filistin Veri Görselleştirme</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #1D1D1D;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        h2 {
+            color: #4a4a4a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9e9e9;
+            padding-bottom: 10px;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+        .card h3 {
+            font-size: 1.4rem;
+            margin-top: 0;
+            color: #2c2c2c;
+            margin-bottom: 15px;
+        }
+        .card p.value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #d32f2f;
+            text-align: center;
+        }
+        .card p.description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 30px 0;
+            position: relative;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            font-style: italic;
+            color: #666;
+        }
+        .error {
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        th {
+            background-color: #f7f7f7;
+            font-weight: bold;
+            color: #333;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        footer {
+            background-color: #1D1D1D;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 40px;
+            font-size: 0.9rem;
+        }
+        footer a {
+            color: #8bc34a;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: none;
+            outline: none;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+        .tab:hover {
+            background-color: #ddd;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            animation: fadeEffect 1s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            header h1 {
+                font-size: 1.8rem;
+            }
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Filistin Veri Görselleştirme</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="openTab(event, 'summary')">Özet</button>
+            <button class="tab" onclick="openTab(event, 'casualties')">Günlük Kayıplar</button>
+            <button class="tab" onclick="openTab(event, 'infrastructure')">Altyapı Hasarı</button>
+            <button class="tab" onclick="openTab(event, 'press')">Basın Mensupları</button>
+        </div>
+
+        <div id="summary" class="tab-content active">
+            <h2>Genel Durum</h2>
+            <div class="dashboard" id="summary-dashboard">
+                <div class="card">
+                    <h3>Toplam Can Kaybı</h3>
+                    <p class="value" id="total-killed">-</p>
+                    <p class="description">Gazze'de şimdiye kadar hayatını kaybeden insanların toplam sayısı</p>
+                </div>
+                <div class="card">
+                    <h3>Çocuk Kayıpları</h3>
+                    <p class="value" id="children-killed">-</p>
+                    <p class="description">Gazze'de şimdiye kadar hayatını kaybeden çocukların toplam sayısı</p>
+                </div>
+                <div class="card">
+                    <h3>Kadın Kayıpları</h3>
+                    <p class="value" id="women-killed">-</p>
+                    <p class="description">Gazze'de şimdiye kadar hayatını kaybeden kadınların toplam sayısı</p>
+                </div>
+                <div class="card">
+                    <h3>Toplam Yaralı</h3>
+                    <p class="value" id="total-injured">-</p>
+                    <p class="description">Gazze'de şimdiye kadar yaralanan insanların toplam sayısı</p>
+                </div>
+                <div class="card">
+                    <h3>Batı Şeria Kayıpları</h3>
+                    <p class="value" id="wb-killed">-</p>
+                    <p class="description">Batı Şeria'da şimdiye kadar hayatını kaybeden insanların toplam sayısı</p>
+                </div>
+                <div class="card">
+                    <h3>Basın Mensubu Kayıpları</h3>
+                    <p class="value" id="press-killed">-</p>
+                    <p class="description">Gazze'de şimdiye kadar hayatını kaybeden basın mensuplarının toplam sayısı</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="casualties-chart"></canvas>
+            </div>
+        </div>
+
+        <div id="casualties" class="tab-content">
+            <h2>Günlük Kayıplar - Gazze</h2>
+            <div class="chart-container">
+                <canvas id="daily-casualties-chart"></canvas>
+            </div>
+            <div class="loading" id="casualties-loading">Veriler yükleniyor...</div>
+            <div id="casualties-table-container" style="display: none;">
+                <table id="casualties-table">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Ölenler</th>
+                            <th>Yaralananlar</th>
+                            <th>Çocuk Kayıpları</th>
+                            <th>Kadın Kayıpları</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="infrastructure" class="tab-content">
+            <h2>Altyapı Hasarı</h2>
+            <div class="chart-container">
+                <canvas id="infrastructure-chart"></canvas>
+            </div>
+            <div class="loading" id="infrastructure-loading">Veriler yükleniyor...</div>
+            <div id="infrastructure-table-container" style="display: none;">
+                <table id="infrastructure-table">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Tamamen Yıkılmış Konutlar</th>
+                            <th>Kısmen Yıkılmış Konutlar</th>
+                            <th>Zarar Görmüş Sağlık Merkezleri</th>
+                            <th>Zarar Görmüş Okullar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="press" class="tab-content">
+            <h2>Hayatını Kaybeden Basın Mensupları</h2>
+            <div class="loading" id="press-loading">Veriler yükleniyor...</div>
+            <div id="press-table-container" style="display: none;">
+                <table id="press-table">
+                    <thead>
+                        <tr>
+                            <th>İsim (Arapça)</th>
+                            <th>İsim (İngilizce)</th>
+                            <th>Notlar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Veriler <a href="https://data.techforpalestine.org/" target="_blank">Tech For Palestine</a> tarafından sağlanmaktadır. Bu gösterge panosu son güncellenme tarihi: <span id="last-updated">-</span></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // API URLs
+        const SUMMARY_URL = 'https://data.techforpalestine.org/api/v2/summary.json';
+        const CASUALTIES_DAILY_URL = 'https://data.techforpalestine.org/api/v2/casualties-daily.json';
+        const INFRASTRUCTURE_URL = 'https://data.techforpalestine.org/api/v2/infrastructure-damaged.json';
+        const PRESS_KILLED_URL = 'https://data.techforpalestine.org/api/v2/press_killed_in_gaza.json';
+
+        // Ana veri depolama
+        let summaryData = null;
+        let casualtiesData = null;
+        let infrastructureData = null;
+        let pressKilledData = null;
+
+        // Sayfa yüklenince verileri getir
+        window.onload = function() {
+            fetchSummaryData();
+            
+            // Tab içeriğini asenkron olarak yüklememiz için event listener ekleyelim
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    const tabId = e.target.textContent.toLowerCase();
+                    if (tabId.includes('özet') && !summaryData) {
+                        fetchSummaryData();
+                    }
+                    if (tabId.includes('günlük') && !casualtiesData) {
+                        fetchCasualtiesData();
+                    }
+                    if (tabId.includes('altyapı') && !infrastructureData) {
+                        fetchInfrastructureData();
+                    }
+                    if (tabId.includes('basın') && !pressKilledData) {
+                        fetchPressKilledData();
+                    }
+                });
+            });
+        };
+
+        // Tab kontrolü
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+
+            const tabs = document.getElementsByClassName("tab");
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove("active");
+            }
+
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            // Tab içeriğini asenkron olarak yükle
+            if (tabName === 'casualties' && !casualtiesData) {
+                fetchCasualtiesData();
+            }
+            if (tabName === 'infrastructure' && !infrastructureData) {
+                fetchInfrastructureData();
+            }
+            if (tabName === 'press' && !pressKilledData) {
+                fetchPressKilledData();
+            }
+        }
+
+        // Özet verileri getir
+        async function fetchSummaryData() {
+            try {
+                const response = await fetch(SUMMARY_URL);
+                if (!response.ok) {
+                    throw new Error('Veri alınamadı');
+                }
+                summaryData = await response.json();
+                updateSummaryDashboard(summaryData);
+                document.getElementById('last-updated').textContent = new Date().toLocaleDateString('tr-TR');
+            } catch (error) {
+                console.error('Özet verileri getirilemedi:', error);
+                document.getElementById('summary-dashboard').innerHTML = `
+                    <div class="error">
+                        Özet verileri yüklenemedi. Lütfen daha sonra tekrar deneyin.
+                    </div>
+                `;
+            }
+        }
+
+        // Günlük kayıp verilerini getir
+        async function fetchCasualtiesData() {
+            try {
+                document.getElementById('casualties-loading').style.display = 'flex';
+                document.getElementById('casualties-table-container').style.display = 'none';
+                
+                const response = await fetch(CASUALTIES_DAILY_URL);
+                if (!response.ok) {
+                    throw new Error('Veri alınamadı');
+                }
+                casualtiesData = await response.json();
+                updateCasualtiesTab(casualtiesData);
+                
+                document.getElementById('casualties-loading').style.display = 'none';
+                document.getElementById('casualties-table-container').style.display = 'block';
+            } catch (error) {
+                console.error('Günlük kayıp verileri getirilemedi:', error);
+                document.getElementById('casualties-loading').style.display = 'none';
+                document.getElementById('casualties').innerHTML += `
+                    <div class="error">
+                        Günlük kayıp verileri yüklenemedi. Lütfen daha sonra tekrar deneyin.
+                    </div>
+                `;
+            }
+        }
+
+        // Altyapı hasar verilerini getir
+        async function fetchInfrastructureData() {
+            try {
+                document.getElementById('infrastructure-loading').style.display = 'flex';
+                document.getElementById('infrastructure-table-container').style.display = 'none';
+                
+                const response = await fetch(INFRASTRUCTURE_URL);
+                if (!response.ok) {
+                    throw new Error('Veri alınamadı');
+                }
+                infrastructureData = await response.json();
+                updateInfrastructureTab(infrastructureData);
+                
+                document.getElementById('infrastructure-loading').style.display = 'none';
+                document.getElementById('infrastructure-table-container').style.display = 'block';
+            } catch (error) {
+                console.error('Altyapı hasar verileri getirilemedi:', error);
+                document.getElementById('infrastructure-loading').style.display = 'none';
+                document.getElementById('infrastructure').innerHTML += `
+                    <div class="error">
+                        Altyapı hasar verileri yüklenemedi. Lütfen daha sonra tekrar deneyin.
+                    </div>
+                `;
+            }
+        }
+
+        // Basın kayıp verilerini getir
+        async function fetchPressKilledData() {
+            try {
+                document.getElementById('press-loading').style.display = 'flex';
+                document.getElementById('press-table-container').style.display = 'none';
+                
+                const response = await fetch(PRESS_KILLED_URL);
+                if (!response.ok) {
+                    throw new Error('Veri alınamadı');
+                }
+                pressKilledData = await response.json();
+                updatePressTab(pressKilledData);
+                
+                document.getElementById('press-loading').style.display = 'none';
+                document.getElementById('press-table-container').style.display = 'block';
+            } catch (error) {
+                console.error('Basın kayıp verileri getirilemedi:', error);
+                document.getElementById('press-loading').style.display = 'none';
+                document.getElementById('press').innerHTML += `
+                    <div class="error">
+                        Basın kayıp verileri yüklenemedi. Lütfen daha sonra tekrar deneyin.
+                    </div>
+                `;
+            }
+        }
+
+        // Özet dashboard'u güncelle
+        function updateSummaryDashboard(data) {
+            // Gaza verileri
+            document.getElementById('total-killed').textContent = formatNumber(data.gaza.killed.total || 0);
+            document.getElementById('children-killed').textContent = formatNumber(data.gaza.killed.children || 0);
+            document.getElementById('women-killed').textContent = formatNumber(data.gaza.killed.women || 0);
+            document.getElementById('total-injured').textContent = formatNumber(data.gaza.injured.total || 0);
+            
+            // West Bank verileri
+            document.getElementById('wb-killed').textContent = formatNumber(data.west_bank.killed.total || 0);
+            
+            // Press verileri
+            document.getElementById('press-killed').textContent = formatNumber(data.gaza.killed.press || 0);
+
+            // Kayıp dağılımı grafiği
+            const ctx = document.getElementById('casualties-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Çocuklar', 'Kadınlar', 'Diğer'],
+                    datasets: [{
+                        data: [
+                            data.gaza.killed.children || 0,
+                            data.gaza.killed.women || 0,
+                            (data.gaza.killed.total || 0) - (data.gaza.killed.children || 0) - (data.gaza.killed.women || 0)
+                        ],
+                        backgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56'
+                        ],
+                        hoverBackgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Gazze Can Kaybı Dağılımı',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Günlük kayıplar tabını güncelle
+        function updateCasualtiesTab(data) {
+            // En son 30 günün verisini alalım (çok fazla veri olabilir)
+            const recentData = data.slice(-30);
+            
+            // Tabloyu doldur
+            const tableBody = document.getElementById('casualties-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            
+            for (const day of recentData) {
+                const row = tableBody.insertRow();
+                
+                const dateCell = row.insertCell(0);
+                dateCell.textContent = formatDate(day.date);
+                
+                const killedCell = row.insertCell(1);
+                killedCell.textContent = formatNumber(day.daily_killed || 0);
+                
+                const injuredCell = row.insertCell(2);
+                injuredCell.textContent = formatNumber(day.daily_injured || 0);
+                
+                const childrenCell = row.insertCell(3);
+                childrenCell.textContent = day.children_killed ? formatNumber(day.children_killed) : '-';
+                
+                const womenCell = row.insertCell(4);
+                womenCell.textContent = day.women_killed ? formatNumber(day.women_killed) : '-';
+            }
+            
+            // Grafiği oluştur
+            const ctx = document.getElementById('daily-casualties-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: recentData.map(day => formatDate(day.date)),
+                    datasets: [
+                        {
+                            label: 'Günlük Ölümler',
+                            data: recentData.map(day => day.daily_killed || 0),
+                            borderColor: '#d32f2f',
+                            backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.2,
+                            fill: true
+                        },
+                        {
+                            label: 'Günlük Yaralanmalar',
+                            data: recentData.map(day => day.daily_injured || 0),
+                            borderColor: '#ff9800',
+                            backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.2,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Son 30 Gün Gazze Kayıpları',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Sayı'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tarih'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Altyapı tabını güncelle
+        function updateInfrastructureTab(data) {
+            // Son 20 raporu alalım
+            const recentData = data.slice(-20);
+            
+            // Tabloyu doldur
+            const tableBody = document.getElementById('infrastructure-table').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            
+            for (const report of recentData) {
+                const row = tableBody.insertRow();
+                
+                const dateCell = row.insertCell(0);
+                dateCell.textContent = formatDate(report.date);
+                
+                const housesDestroyedCell = row.insertCell(1);
+                housesDestroyedCell.textContent = formatNumber(report.houses_destroyed || 0);
+                
+                const housesPartiallyCell = row.insertCell(2);
+                housesPartiallyCell.textContent = formatNumber(report.houses_partially || 0);
+                
+                const healthCentersCell = row.insertCell(3);
+                healthCentersCell.textContent = formatNumber(report.health_centers || 0);
+                
+                const schoolsCell = row.insertCell(4);
+                schoolsCell.textContent = formatNumber(report.schools || 0);
+            }
+            
+            // Grafiği oluştur
+            const ctx = document.getElementById('infrastructure-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: recentData.map(day => formatDate(day.date)),
+                    datasets: [
+                        {
+                            label: 'Tamamen Yıkılmış Konutlar',
+                            data: recentData.map(day => day.houses_destroyed || 0),
+                            backgroundColor: '#d32f2f',
+                        },
+                        {
+                            label: 'Kısmen Yıkılmış Konutlar',
+                            data: recentData.map(day => day.houses_partially || 0),
+                            backgroundColor: '#ff9800',
+                        },
+                        {
+                            label: 'Zarar Görmüş Sağlık Merkezleri',
+                            data: recentData.map(day => day.health_centers || 0),
+                            backgroundColor: '#2196f3',
+                        },
+                        {
+                            label: 'Zarar Görmüş Okullar
